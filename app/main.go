@@ -116,12 +116,12 @@ func main() {
 	tracer = otel.Tracer(serviceName)
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("GET /", instrumentRoute("/", rootHandler))
+	mux.HandleFunc("GET /{$}", instrumentRoute("/", rootHandler))
 	mux.HandleFunc("GET /health", instrumentRoute("/health", healthHandler))
 	mux.HandleFunc("GET /api/orders", instrumentRoute("/api/orders", ordersHandler))
 	mux.HandleFunc("GET /api/slow", instrumentRoute("/api/slow", slowHandler))
 	mux.HandleFunc("GET /api/error", instrumentRoute("/api/error", errorHandler))
-	mux.Handle("/metrics", promhttp.Handler())
+	mux.Handle("GET /metrics", promhttp.Handler())
 
 	wrapped := otelhttp.NewHandler(mux, "http.server", otelhttp.WithMessageEvents(otelhttp.ReadEvents, otelhttp.WriteEvents))
 

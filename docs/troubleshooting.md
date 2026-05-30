@@ -111,3 +111,28 @@ make k8s-deploy
 ```
 
 This builds `observability-lab-app:local` and loads it into kind.
+
+## App keeps restarting with `ServeMux` pattern conflict
+
+If `docker compose ps` shows the app as restarting and the logs contain:
+
+```text
+panic: pattern "/metrics" conflicts with pattern "GET /"
+```
+
+then the root route is being registered as a subtree match. With the modern Go `net/http.ServeMux`, `GET /` can overlap with more specific paths such as `/metrics` when the latter is registered without the same method specificity.
+
+The app fixes this by registering the root route as an exact match and by making the metrics route method-specific:
+
+```go
+mux.HandleFunc("GET /{$}", instrumentRoute("/", rootHandler))
+mux.Handle("GET /metrics", promhttp.Handler())
+```
+
+After applying the fix, rebuild the app image and recreate the container:
+
+```bash
+docker compose build --no-cache app
+make up
+make test
+```
