@@ -13,6 +13,8 @@ This repository was initialized with real Git commits. The generated history is:
 9. `docs: align commit history with generated repository`
 10. `style(app): format Go source`
 11. `fix(app): preserve generated Go module checksums during Docker build`
+12. `fix(app): resolve Go module checksums during Docker build`
+13. `docs: add troubleshooting note for Go checksum builds`
 
 Check the real history with:
 
@@ -20,4 +22,4 @@ Check the real history with:
 git log --oneline --decorate
 ```
 
-Note: this repository keeps Docker as the primary reproducible path. The Dockerfile downloads modules before copying application sources, so the container-side `go.sum` generated during `go mod download` is preserved for the image build. If you want to develop the Go app directly on the host, run `cd app && go mod tidy` once to populate the local checksum file.
+Note: this repository keeps Docker as the primary reproducible path. The Dockerfile resolves modules with `go mod tidy` inside the build stage after copying the actual source imports. This avoids requiring Go on the host while still producing a valid checksum set inside the image build. If you want to develop the Go app directly on the host, run `cd app && go mod tidy` once to populate the local checksum file.

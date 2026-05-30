@@ -25,6 +25,31 @@ open http://localhost:9090/targets
 
 Prometheus target `demo-app` should be UP.
 
+
+## Docker build fails with missing go.sum entries
+
+Symptom:
+
+```text
+missing go.sum entry for module providing package ...
+```
+
+The app image intentionally resolves Go modules inside Docker, so a fresh clone can start without requiring Go on the host. The Dockerfile copies `go.mod` and `main.go`, runs `go mod tidy` inside the build stage, and then compiles the binary.
+
+If Docker is using a stale cached layer from an older generated version, rebuild the app image without cache:
+
+```bash
+docker compose build --no-cache app
+make up
+```
+
+For local Go development outside Docker, populate the checksum file once:
+
+```bash
+cd app
+go mod tidy
+```
+
 ## No traces in Tempo/Grafana
 
 Generate traffic first:
