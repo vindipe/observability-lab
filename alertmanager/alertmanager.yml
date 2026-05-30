@@ -1,0 +1,24 @@
+global:
+  resolve_timeout: 1m
+
+route:
+  receiver: local-demo
+  group_by: ["alertname", "service"]
+  group_wait: 5s
+  group_interval: 30s
+  repeat_interval: 10m
+
+receivers:
+  - name: local-demo
+    webhook_configs:
+      # In a real deployment this would be PagerDuty, Opsgenie, Slack, email, etc.
+      # This demo keeps the config local and observable from the Alertmanager UI.
+      - url: http://localhost:65535/demo-webhook-disabled
+        send_resolved: true
+
+inhibit_rules:
+  - source_matchers:
+      - severity="critical"
+    target_matchers:
+      - severity="warning"
+    equal: ["service"]

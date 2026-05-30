@@ -1,0 +1,52 @@
+groups:
+  - name: orders-api-slo-demo
+    interval: 10s
+    rules:
+      - alert: OrdersApiDown
+        expr: up{job="demo-app"} == 0
+        for: 30s
+        labels:
+          severity: critical
+          service: orders-api
+        annotations:
+          summary: "orders-api is down"
+          description: "Prometheus cannot scrape the orders-api target for more than 30 seconds."
+
+      - alert: HighErrorRate
+        expr: |
+          (
+            sum(rate(demo_http_requests_total{route="/api/error",status=~"5.."}[1m]))
+            /
+            clamp_min(sum(rate(demo_http_requests_total{route="/api/error"}[1m])), 0.001)
+          ) > 0.25
+        for: 30s
+        labels:
+          severity: warning
+          service: orders-api
+        annotations:
+          summary: "High error rate on /api/error"
+          description: "More than 25% of /api/error requests are returning 5xx responses."
+
+      - alert: HighP95Latency
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum(rate(demo_http_request_duration_seconds_bucket{route=~"/api/orders|/api/slow"}[2m])) by (le, route)
+          ) > 1.0
+        for: 1m
+        labels:
+          severity: warning
+          service: orders-api
+        annotations:
+          summary: "High p95 latency"
+          description: "p95 latency is above 1 second for at least one demo route."
+
+      - alert: RedisDependencyErrors
+        expr: increase(demo_dependency_errors_total{dependency="redis"}[2m]) > 0
+        for: 30s
+        labels:
+          severity: warning
+          service: orders-api
+        annotations:
+          summary: "Redis dependency errors detected"
+          description: "The application recorded Redis dependency errors in the last 2 minutes."

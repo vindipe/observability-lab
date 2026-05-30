@@ -1,0 +1,99 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+  # This receiver lets the collector ingest application metrics from /metrics.
+  # Prometheus still remains the metrics database/query engine in the base mode.
+  prometheus:
+    config:
+      scrape_configs:
+        - job_name: orders-api-via-otel
+          scrape_interval: 10s
+          static_configs:
+            - targets: ["app:8080"]
+        - job_name: otel-collector-internal
+          scrape_interval: 10s
+          static_configs:
+            - targets: ["otel-collector:8888"]
+
+  # Reads the structured JSON log file written by the Go app.
+  # This demonstrates an OpenTelemetry logs pipeline without relying on Docker socket access.
+  filelog:
+    include:
+      - /var/log/observability-lab/app.log
+    start_at: beginning
+    include_file_path: true
+    include_file_name: true
+    operators:
+      - type: json_parser
+        timestamp:
+          parse_from: attributes.time
+          layout_type: gotime
+          layout: "2006-01-02T15:04:05.999999999Z07:00"
+      - type: move
+        from: attributes.msg
+        to: body
+        if: 'attributes["msg"] != nil'
+
+processors:
+  memory_limiter:
+    check_interval: 1s
+    limit_mib: 256
+    spike_limit_mib: 64
+  resource:
+    attributes:
+      - action: upsert
+        key: service.name
+        value: orders-api
+      - action: upsert
+        key: deployment.environment
+        value: local
+  batch:
+    timeout: 5s
+    send_batch_size: 1024
+
+exporters:
+  otlp/tempo:
+    endpoint: tempo:4317
+    tls:
+      insecure: true
+
+  # Prometheus scrapes this endpoint, so the collector can be part of the metrics pipeline.
+  prometheus:
+    endpoint: 0.0.0.0:8889
+    namespace: otelcol
+    const_labels:
+      pipeline: otel
+
+  # Loki can ingest OTLP logs at /otlp.
+  otlphttp/loki:
+    endpoint: http://loki:3100/otlp
+    tls:
+      insecure: true
+
+  debug:
+    verbosity: basic
+
+service:
+  telemetry:
+    logs:
+      level: info
+    metrics:
+      address: 0.0.0.0:8888
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, resource, batch]
+      exporters: [otlp/tempo, debug]
+    metrics:
+      receivers: [otlp, prometheus]
+      processors: [memory_limiter, resource, batch]
+      exporters: [prometheus, debug]
+    logs:
+      receivers: [otlp, filelog]
+      processors: [memory_limiter, resource, batch]
+      exporters: [otlphttp/loki, debug]
