@@ -136,3 +136,32 @@ docker compose build --no-cache app
 make up
 make test
 ```
+
+## `make traffic` prints HTTP 500 for `/api/error`
+
+That endpoint intentionally returns failures to generate error-rate metrics, logs,
+traces, and alert traffic. In earlier versions of the lab the traffic script used
+`curl -f`, which made those intentional HTTP 500 responses look like script
+errors. The script now treats `/api/error` failures as expected demo traffic.
+
+## Loki `/ready` returns HTTP 503
+
+On some local Docker/WSL runs, Loki's `/ready` endpoint can remain stricter than
+necessary for this lab even though the HTTP API is available. For smoke testing,
+prefer:
+
+```bash
+curl -fsS http://localhost:3100/loki/api/v1/status/buildinfo
+```
+
+For deeper troubleshooting, inspect Loki logs:
+
+```bash
+docker compose logs --tail=200 loki
+```
+
+Then verify labels after generating traffic:
+
+```bash
+curl -G -s "http://localhost:3100/loki/api/v1/labels"
+```
