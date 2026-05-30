@@ -1,0 +1,22 @@
+name: orders-api
+summary: Conceptual charm skeleton for the observability lab Go service
+description: |
+  This skeleton is intentionally minimal. It demonstrates how the Go demo service
+  could be represented as a Juju charm with relation-aware operations.
+containers:
+  orders-api:
+    resource: orders-api-image
+resources:
+  orders-api-image:
+    type: oci-image
+    description: OCI image for the orders-api demo service
+provides:
+  metrics-endpoint:
+    interface: prometheus_scrape
+  grafana-dashboard:
+    interface: grafana_dashboard
+  logging:
+    interface: loki_push_api
+requires:
+  redis:
+    interface: redis

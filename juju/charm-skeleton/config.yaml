@@ -1,0 +1,9 @@
+options:
+  demo-error-rate:
+    type: float
+    default: 0.40
+    description: Probability that /api/error returns HTTP 500.
+  otel-sample-ratio:
+    type: float
+    default: 1.0
+    description: Trace sampling ratio for local/demo environments.

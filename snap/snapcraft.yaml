@@ -1,0 +1,30 @@
+name: observability-lab-orders-api
+base: core24
+version: '0.1.0'
+summary: Go demo service for a cloud-native observability lab
+description: |
+  A small Go HTTP service exposing Prometheus metrics, structured logs and
+  OpenTelemetry traces for local observability demonstrations.
+
+grade: devel
+confinement: strict
+
+platforms:
+  amd64:
+  arm64:
+
+apps:
+  orders-api:
+    command: bin/orders-api
+    plugs:
+      - network
+      - network-bind
+    environment:
+      APP_PORT: "8080"
+
+parts:
+  orders-api:
+    plugin: go
+    source: ../app
+    build-snaps:
+      - go/latest/stable
