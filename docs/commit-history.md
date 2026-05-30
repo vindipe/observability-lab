@@ -12,6 +12,7 @@ This repository was initialized with real Git commits. The generated history is:
 8. `docs: finalize professional README and usage guide`
 9. `docs: align commit history with generated repository`
 10. `style(app): format Go source`
+11. `fix(app): preserve generated Go module checksums during Docker build`
 
 Check the real history with:
 
@@ -19,4 +20,4 @@ Check the real history with:
 git log --oneline --decorate
 ```
 
-Note: `go.sum` is present but may be populated/updated by `go mod download` during the first Docker build because this artifact was generated in an environment without outbound Go module access.
+Note: this repository keeps Docker as the primary reproducible path. The Dockerfile downloads modules before copying application sources, so the container-side `go.sum` generated during `go mod download` is preserved for the image build. If you want to develop the Go app directly on the host, run `cd app && go mod tidy` once to populate the local checksum file.
