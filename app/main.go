@@ -255,7 +255,7 @@ func instrumentRoute(route string, next func(http.ResponseWriter, *http.Request)
 
 func rootHandler(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, map[string]any{
-		"service": serviceName,
+		"service":   serviceName,
 		"endpoints": []string{"/health", "/api/orders", "/api/slow", "/api/error", "/metrics"},
 	})
 }
