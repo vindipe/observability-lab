@@ -1,0 +1,26 @@
+# OS/editor
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Local env and generated files
+.env
+*.local
+*.log
+coverage.out
+
+# Go
+app/orders-api
+app/bin/
+
+# Docker/Kubernetes runtime artifacts
+.tmp/
+kind-kubeconfig
+
+# Snapcraft build outputs
+snap/.snapcraft/
+*.snap
+parts/
+prime/
+stage/
