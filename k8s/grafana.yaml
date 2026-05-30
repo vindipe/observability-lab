@@ -1,0 +1,101 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-provisioning
+  namespace: observability-lab
+data:
+  datasources.yml: |
+    apiVersion: 1
+    datasources:
+      - name: Prometheus
+        uid: prometheus
+        type: prometheus
+        access: proxy
+        url: http://prometheus:9090
+        isDefault: true
+      - name: Loki
+        uid: loki
+        type: loki
+        access: proxy
+        url: http://loki:3100
+      - name: Tempo
+        uid: tempo
+        type: tempo
+        access: proxy
+        url: http://tempo:3200
+  dashboards.yml: |
+    apiVersion: 1
+    providers:
+      - name: Observability Lab
+        type: file
+        options:
+          path: /var/lib/grafana/dashboards
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard
+  namespace: observability-lab
+data:
+  orders-api-overview.json: |
+    {"uid":"cloud-native-observability-lab-k8s","title":"Cloud-Native Observability Lab - Kubernetes","schemaVersion":39,"version":1,"refresh":"10s","time":{"from":"now-30m","to":"now"},"panels":[{"id":1,"type":"timeseries","title":"Request rate","gridPos":{"x":0,"y":0,"w":12,"h":8},"targets":[{"datasource":{"type":"prometheus","uid":"prometheus"},"expr":"sum(rate(demo_http_requests_total[1m])) by (route)","legendFormat":"{{route}}","refId":"A"}]},{"id":2,"type":"logs","title":"Logs","gridPos":{"x":12,"y":0,"w":12,"h":8},"targets":[{"datasource":{"type":"loki","uid":"loki"},"expr":"{service_name=\"orders-api\"} | json","refId":"A"}]}]}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grafana
+  namespace: observability-lab
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: grafana
+  template:
+    metadata:
+      labels:
+        app: grafana
+    spec:
+      containers:
+        - name: grafana
+          image: grafana/grafana:11.5.2
+          ports:
+            - containerPort: 3000
+          env:
+            - name: GF_SECURITY_ADMIN_USER
+              value: admin
+            - name: GF_SECURITY_ADMIN_PASSWORD
+              value: admin
+            - name: GF_AUTH_ANONYMOUS_ENABLED
+              value: "true"
+            - name: GF_AUTH_ANONYMOUS_ORG_ROLE
+              value: Admin
+          volumeMounts:
+            - name: provisioning
+              mountPath: /etc/grafana/provisioning/datasources/datasources.yml
+              subPath: datasources.yml
+            - name: provisioning
+              mountPath: /etc/grafana/provisioning/dashboards/dashboards.yml
+              subPath: dashboards.yml
+            - name: dashboards
+              mountPath: /var/lib/grafana/dashboards/orders-api-overview.json
+              subPath: orders-api-overview.json
+      volumes:
+        - name: provisioning
+          configMap:
+            name: grafana-provisioning
+        - name: dashboards
+          configMap:
+            name: grafana-dashboard
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana
+  namespace: observability-lab
+spec:
+  selector:
+    app: grafana
+  ports:
+    - name: http
+      port: 3000
+      targetPort: 3000

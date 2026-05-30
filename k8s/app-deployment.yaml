@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: orders-api
+  namespace: observability-lab
+  labels:
+    app: orders-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: orders-api
+  template:
+    metadata:
+      labels:
+        app: orders-api
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: /metrics
+        prometheus.io/port: "8080"
+    spec:
+      containers:
+        - name: orders-api
+          image: observability-lab-app:local
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            - name: APP_PORT
+              value: "8080"
+            - name: REDIS_ADDR
+              value: redis:6379
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: otel-collector:4317
+            - name: OTEL_SAMPLE_RATIO
+              value: "1.0"
+            - name: DEPLOYMENT_ENVIRONMENT
+              value: kind
+            - name: DEMO_ERROR_RATE
+              value: "0.40"
+            - name: LOG_FILE
+              value: /var/log/observability-lab/app.log
+          volumeMounts:
+            - name: app-logs
+              mountPath: /var/log/observability-lab
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 15
+      volumes:
+        - name: app-logs
+          emptyDir: {}

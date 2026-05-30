@@ -1,0 +1,85 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-config
+  namespace: observability-lab
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval: 10s
+      evaluation_interval: 10s
+    rule_files:
+      - /etc/prometheus/rules.yml
+    alerting:
+      alertmanagers:
+        - static_configs:
+            - targets: ["alertmanager:9093"]
+    scrape_configs:
+      - job_name: demo-app
+        static_configs:
+          - targets: ["orders-api:8080"]
+      - job_name: otel-collector
+        static_configs:
+          - targets: ["otel-collector:8888", "otel-collector:8889"]
+  rules.yml: |
+    groups:
+      - name: orders-api
+        rules:
+          - alert: OrdersApiDown
+            expr: up{job="demo-app"} == 0
+            for: 30s
+            labels:
+              severity: critical
+            annotations:
+              summary: orders-api target is down
+          - alert: HighErrorRate
+            expr: sum(rate(demo_http_requests_total{status=~"5.."}[1m])) / clamp_min(sum(rate(demo_http_requests_total[1m])), 0.001) > 0.25
+            for: 30s
+            labels:
+              severity: warning
+            annotations:
+              summary: High error rate in orders-api
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus
+  namespace: observability-lab
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prometheus
+  template:
+    metadata:
+      labels:
+        app: prometheus
+    spec:
+      containers:
+        - name: prometheus
+          image: prom/prometheus:v2.55.1
+          args:
+            - --config.file=/etc/prometheus/prometheus.yml
+            - --storage.tsdb.retention.time=6h
+          ports:
+            - containerPort: 9090
+          volumeMounts:
+            - name: config
+              mountPath: /etc/prometheus
+      volumes:
+        - name: config
+          configMap:
+            name: prometheus-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus
+  namespace: observability-lab
+spec:
+  selector:
+    app: prometheus
+  ports:
+    - name: http
+      port: 9090
+      targetPort: 9090
