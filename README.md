@@ -82,7 +82,7 @@ Go orders-api ---- /metrics ----------------------> Prometheus -----> Alertmanag
 
 ## Components
 
-| Component | Role in this lab |
+| Component | Engineering Context in this lab |
 |---|---|
 | Go app | emits metrics, logs and OpenTelemetry traces |
 | Redis | lightweight stateful dependency used to simulate external latency/errors |
