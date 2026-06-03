@@ -28,7 +28,3 @@ Possible production metrics/questions:
 - WSL may not expose all kernel features needed for eBPF profiling.
 - Docker Desktop may require privileged containers and extra capabilities.
 - A brittle privileged setup is worse than a stable technical review demo.
-
-Technical Review framing:
-
-> I know where profiling fits: it complements metrics, logs and traces. I did not enable Parca by default because local eBPF support can be environment-dependent, but I documented how it would extend the stack.

@@ -1,20 +1,12 @@
 # Cloud-Native Observability Lab
 
-A complete local observability demo designed for a **Junior Software Developer - Observability** technical review at Cloud-Native.
+A complete local observability demo designed for a **Junior Software Developer - Observability** technical review.
 
 The lab demonstrates a realistic cloud-native telemetry flow:
 
 > A Go service generates metrics, logs and traces. OpenTelemetry Collector receives and routes telemetry. Prometheus evaluates metrics and alert rules. Alertmanager receives alerts. Loki stores logs. Tempo stores traces. Grafana correlates everything. Kubernetes manifests and Juju-oriented docs explain how the same ideas map to operator-driven platform operations.
 
 This is intentionally not an enterprise platform. It is a stable, reproducible, local technical demo you can run, inspect and explain.
-
----
-
-## What this repository proves
-
-You can say in technical review:
-
-> I built a mini-platform where a Go app emits Prometheus metrics, structured JSON logs and OpenTelemetry traces. The OpenTelemetry Collector receives traces, metrics and logs, routes traces to Tempo, logs to Loki, and exposes collected metrics to Prometheus. Prometheus evaluates alert rules and sends alerts to Alertmanager. Grafana is automatically provisioned with datasources and a dashboard for request rate, error rate, latency, logs, traces and alert state. I also mapped the architecture to Kubernetes, Juju models, charms and Day 2 operations.
 
 ---
 
@@ -385,10 +377,6 @@ juju/charm-skeleton/
 docs/juju-charms-operators.md
 ```
 
-Key technical review idea:
-
-> Docker Compose and Kubernetes manifests describe how to run the components. Juju charms encode operational knowledge: relations, configuration changes, upgrades, health checks, dashboards, alerts, backups and Day 2 actions.
-
 Conceptual model split:
 
 ```text
@@ -508,10 +496,6 @@ It is documented in:
 docs/parca-ebpf.md
 ```
 
-Technical Review sentence:
-
-> I know profiling complements tracing. Tracing tells me which request path was slow; profiling tells me where CPU time was spent. I kept eBPF optional because local kernel/capability requirements can make the demo unreliable.
-
 ---
 
 ## Snap decision
@@ -523,10 +507,6 @@ snap/snapcraft.yaml
 docs/snap-packaging.md
 ```
 
-Technical Review sentence:
-
-> I used containers for the cloud-native demo, but I included Snap packaging notes because Snap is relevant in the cloud-native platform ecosystem for distributing agents, CLIs, host services and IoT software.
-
 ---
 
 ## OpenStack context
@@ -536,10 +516,6 @@ This lab does not deploy OpenStack locally. It documents where OpenStack fits ar
 ```text
 docs/openstack-context.md
 ```
-
-Technical Review sentence:
-
-> OpenStack is the IaaS layer; Kubernetes can run on top of it; observability must cover both the infrastructure control plane and the workloads. I did not deploy OpenStack locally because that would be out of scope for a stable demo.
 
 ---
 
@@ -569,7 +545,7 @@ cp .env.example .env
 
 ---
 
-## How to explain it if they ask why you chose these components
+## Why these components
 
 - **Go**: small compiled service, readable instrumentation, relevant to cloud-native backend work.
 - **Prometheus**: best fit for scraping, PromQL and alert rule evaluation in a local demo.
@@ -582,22 +558,6 @@ cp .env.example .env
 - **Mimir optional**: important for scale and tenancy, unnecessary for a base local lab.
 - **Parca optional**: important conceptually, but local eBPF can be fragile.
 - **Juju docs/charm skeleton**: demonstrates awareness of an operator-driven platform operations model.
-
----
-
-## Final checklist before technical review
-
-- [ ] `make up` works.
-- [ ] `make traffic` produces dashboard data.
-- [ ] Grafana opens at `localhost:3000`.
-- [ ] Prometheus target `demo-app` is UP.
-- [ ] `/api/error` can trigger alerts.
-- [ ] You can explain metrics vs logs vs traces.
-- [ ] You can explain why OpenTelemetry is not a storage backend.
-- [ ] You can explain Prometheus vs Mimir.
-- [ ] You can explain why Cassandra and Parca are optional.
-- [ ] You can explain Day 1 vs Day 2 operations.
-- [ ] You can explain how Juju charms would encode operational knowledge.
 
 ---
 

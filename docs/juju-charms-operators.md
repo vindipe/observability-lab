@@ -61,7 +61,3 @@ A charm is not only a deployment template. It encodes operational knowledge.
 - `set-log-retention`;
 - `upgrade-workload`;
 - relation-changed handlers for Prometheus, Grafana, Loki and Tempo.
-
-## Technical Review sentence
-
-> A Kubernetes manifest describes desired state. A charm goes further: it captures the operational lifecycle around that state, including relations, upgrades, configuration changes and Day 2 actions.

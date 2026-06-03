@@ -40,11 +40,3 @@ Examples mapped to this lab:
 | Config rotation | edit `.env` / ConfigMaps | model config, charm config, relation-driven reloads |
 | Rollback | revert image/config Git commit | charm revision rollback, workload version pinning |
 | Incident response | trigger `/api/error`, inspect alert flow | on-call routing, SLOs, postmortem workflow |
-
-## Why this matters for Cloud-Native Observability
-
-cloud-native observability work is not just about installing Grafana. It is about encoding operational knowledge into reusable automation: charms, relations, models, health checks, upgrades, dashboards and alert rules.
-
-This lab gives you a concrete story:
-
-> I can deploy a telemetry-producing workload, route signals to the right backends, inspect metrics/logs/traces, trigger alerts, and explain how the same architecture would become more reliable with operators and Juju models.

@@ -18,7 +18,3 @@ A snap is a Linux application package with metadata, confinement, interfaces, ch
 ## Example
 
 See `snap/snapcraft.yaml` for a minimal conceptual package of the Go app.
-
-## Technical Review framing
-
-> I would not force Snap into the main demo because the workload is intentionally containerized. But Snap is relevant in the cloud-native platform ecosystem for distributing agents, CLIs or host-level services, whereas containers are natural for this Kubernetes observability lab.

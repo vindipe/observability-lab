@@ -23,7 +23,7 @@ bare metal -> OpenStack -> Kubernetes -> applications -> observability stack
 
 ## Observability of OpenStack
 
-Signals you would care about:
+Signals to care about:
 
 - Nova scheduler/API latency and errors;
 - Neutron agent health and network errors;
@@ -34,11 +34,3 @@ Signals you would care about:
 - hypervisor resource saturation;
 - VM lifecycle events;
 - storage and network throughput.
-
-## Why Cloud-Native may care about both
-
-Cloud-Native operates across Ubuntu, Kubernetes, OpenStack, Juju, MAAS and observability. Observability is valuable both for cloud-native workloads and for the infrastructure layers underneath them.
-
-Technical Review framing:
-
-> I did not deploy OpenStack locally because it is outside the scope of a stable technical review demo, but I understand where observability would sit: collecting telemetry from the IaaS control plane, Kubernetes clusters running on top of it, and applications running inside Kubernetes.
